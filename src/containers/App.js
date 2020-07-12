@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import CardList from '../components/CardList';
 import SearchBox from '../components/SearchBox';
 //import { robots } from './robots';
@@ -6,15 +7,25 @@ import SearchBox from '../components/SearchBox';
 import './App.css';
 import Scroll from '../components/Scroll';
 import ErrorBoundry from '../components/ErrorBoundry';
+import { searchField, setSearchField } from '../actions';
 
+const mapStateToProps = state => {
+    return {
+        searchField: state.searchField
+    }
+}
+const mapDispatchToProps = (dispatch) => {
+    return {
+        onSearchChange: (event) => dispatch(setSearchField(event.target.value))
+    }
+}
 class App extends Component {
     constructor(){
         super();
         this.state = {
-            robots: [],
-            searchField: ''
+            robots: []
         }
-        console.log('constructor');
+        //console.log('constructor');
     }
 componentDidMount(){
     fetch('https://jsonplaceholder.typicode.com/users')
@@ -25,24 +36,23 @@ componentDidMount(){
         this.setState({ robots: users})
     });
    // this.setState({robots: robots});
-    console.log('componentDidMount');
+   // console.log('componentDidMount');
 }
-    onSearchChange = (event) => {
-        this.setState({searchField: event.target.value});
-    }
+
     render() {
         // instead of keep using this.state.robots, we can destructure it:
-        const {robots, searchField} = this.state;
+        const {robots} = this.state;
+        const { searchField, onSearchChange } = this.props;
         const filteredRobots = robots.filter(robot =>{
             return robot.name.toLowerCase().includes(searchField.toLowerCase());
         });
-        console.log('render');
+        //console.log('render');
         return !robots.length ?
             <h1>...Loading...</h1> :
             (
             <div className='tc'>
             <h1 className='f1'>RoboFriends</h1>
-            <SearchBox searchChange={this.onSearchChange}/>
+            <SearchBox searchChange={onSearchChange}/>
             <Scroll>
                 <ErrorBoundry>
             <CardList robots={filteredRobots}/>
@@ -53,4 +63,4 @@ componentDidMount(){
     }
 
 }
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App);
